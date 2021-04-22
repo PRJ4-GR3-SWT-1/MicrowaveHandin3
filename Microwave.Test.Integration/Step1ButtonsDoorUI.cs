@@ -2,7 +2,7 @@ using NUnit.Framework;
 
 namespace Microwave.Test.Integration
 {
-    public class Tests
+    public class Step1ButtonsDoorUI
     {
         [SetUp]
         public void Setup()
