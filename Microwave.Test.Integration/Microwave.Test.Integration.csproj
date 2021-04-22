@@ -14,4 +14,8 @@
     <PackageReference Include="NunitXml.TestLogger" Version="3.0.97" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Microwave.Classes\Microwave.Classes.csproj" />
+  </ItemGroup>
+
 </Project>
