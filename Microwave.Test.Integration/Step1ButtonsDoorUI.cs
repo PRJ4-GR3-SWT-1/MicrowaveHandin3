@@ -1,3 +1,4 @@
+using System.Threading;
 using Microwave.Classes.Boundary;
 using Microwave.Classes.Controllers;
 using Microwave.Classes.Interfaces;
@@ -31,11 +32,227 @@ namespace Microwave.Test.Integration
             //Assemble instances to UI
             ui = new UserInterface(powerButton, timeButton, startCancelButton, door, display, light, cookController);
         }
+        //UC step 2:
+        [Test]
+        public void OpenDoor__LightIsOn()
+        {
+            door.Open();
+            light.Received(1).TurnOn();
+        }
+        //UC step 5:
 
         [Test]
-        public void Test1()
+        public void CloseDoor_DoorWasOpen_LightIsOff()
         {
-            Assert.Pass();
+            door.Open();
+            door.Close();
+            light.Received(1).TurnOff();
+        }
+
+        //UC step 6:
+        [TestCase(1)]
+        [TestCase(2)]
+        [TestCase(13)]
+        [TestCase(14)]
+        [TestCase(15)]
+
+        public void PressPower_DoorWasOpenedAndClosed_DisplayIsCalled(int presses)
+        {
+            door.Open();
+            door.Close();
+            for (int i = 0; i < presses; i++)
+            {
+                powerButton.Press();
+            }
+            
+            display.Received(presses).ShowPower(Arg.Any<int>());
+        }
+
+        //UC step 6:
+        [TestCase(1,50)]
+        [TestCase(2,100)]
+        [TestCase(13,650)]
+        [TestCase(14,700)]
+        [TestCase(15,50)]
+        [TestCase(28, 700)]
+        [TestCase(30, 100)]
+        [TestCase(772, 100)]
+
+        public void PressPower_DoorWasOpenedAndClosed_CorrectWattageIsShown(int presses,int expectedWattage)
+        {
+            door.Open();
+            door.Close();
+            for (int i = 0; i < presses; i++)
+            {
+                powerButton.Press();
+            }
+
+            display.Received((presses - 1)/14+1).ShowPower(expectedWattage);
+        }
+
+        //UC step 7:
+        [TestCase(1)]
+        [TestCase(59)]
+        [TestCase(60)]
+        [TestCase(601)]
+
+        public void PressTime_PowerIsSet_CorrectTimeIsShown(int presses)
+        {
+            door.Open();
+            door.Close();
+            for (int i = 0; i < 10; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < presses; i++)
+            {
+                timeButton.Press();
+            }
+
+            display.Received(1).ShowTime(presses,0);
+        }
+
+        //UC step 9:
+        [Test]
+
+        public void PressStartCancel_MicrowaveIsSetUp_LightIsCalled()
+        {
+            door.Open();
+            door.Close();
+            for (int i = 0; i < 10; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < 10; i++)
+            {
+                timeButton.Press();
+            }
+            startCancelButton.Press();
+
+            light.Received(2).TurnOn();
+        }
+        //UC step 10:
+        [Test]
+        public void PressStartCancel_MicrowaveIsSetUp_CookControllerIsCalled()
+        {
+            door.Open();
+            door.Close();
+            for (int i = 0; i < 10; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < 10; i++)
+            {
+                timeButton.Press();
+            }
+            startCancelButton.Press();
+
+            cookController.Received(1).StartCooking(Arg.Any<int>(),600);
+        }
+
+        //UC step 10:
+        [TestCase(1, 50)]
+        [TestCase(2, 100)]
+        [TestCase(13, 650)]
+        [TestCase(14, 700)]
+        [TestCase(15, 50)]
+        [TestCase(28, 700)]
+        [TestCase(30, 100)]
+        [TestCase(772, 100)]
+
+        public void OvenStart_PowerIsSet_CorrectWattageIsPassedToCookController(int presses, int expectedWattage)
+        {
+            door.Open();
+            door.Close();
+            for (int i = 0; i < presses; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < presses; i++)
+            {
+                timeButton.Press();
+            }
+            startCancelButton.Press();
+            cookController.Received(1).StartCooking(expectedWattage,Arg.Any<int>());
+        }
+
+        //UC step 13:
+        [Test]
+        public void CookingIsDone_NormalProcedure_LightTurnsOff()
+        {
+            door.Open();
+            door.Close();
+            for (int i = 0; i < 10; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < 2; i++)
+            {
+                timeButton.Press();
+            }
+            startCancelButton.Press();
+            ui.CookingIsDone();
+            light.Received(2).TurnOff();
+        }
+
+        //UC step 14:
+        [Test]
+        public void CookingIsDone_NormalProcedure_DisplayIsBlanked()
+        {
+            door.Open();
+            door.Close();
+            for (int i = 0; i < 10; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < 2; i++)
+            {
+                timeButton.Press();
+            }
+            startCancelButton.Press();
+            ui.CookingIsDone();
+            display.Received(1).Clear();
+        }
+
+        //UC step 16:
+        [Test]
+        public void DoorOpens_CookingIsDone_LightTurnsOn()
+        {
+            door.Open();
+            door.Close();
+            for (int i = 0; i < 10; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < 2; i++)
+            {
+                timeButton.Press();
+            }
+            startCancelButton.Press();
+            ui.CookingIsDone();
+            door.Open();
+            light.Received(3).TurnOn();
+        }
+
+        //UC step 19:
+        [Test]
+        public void DoorCloses_CookingIsDone_LightTurnsOff()
+        {
+            door.Open();
+            door.Close();
+            for (int i = 0; i < 10; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < 2; i++)
+            {
+                timeButton.Press();
+            }
+            startCancelButton.Press();
+            ui.CookingIsDone();
+            door.Open();
+            door.Close();
+            light.Received(3).TurnOff();
         }
     }
 }
