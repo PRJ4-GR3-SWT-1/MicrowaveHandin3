@@ -155,25 +155,50 @@ namespace Microwave.Test.Integration
             fakeOutput.Received(1).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($" turned off")));
         }
 
-        //[TestCase(1, 50, 1)]
-        //[TestCase(13, 650,13)]
-        //[TestCase(14, 700,14)]
-        //[TestCase(15, 50,15)]
-        //public void OvenCookingStarted_ObjectsCalledWithCorrectParameters(int presses, int ExpectedWattage, int ExpectedTime)
-        //{
+        [TestCase(1, 50, 1)]
+        [TestCase(13, 650, 13)]
+        [TestCase(14, 700, 14)]
+        [TestCase(15, 50, 15)]
+        public void OvenCookingStarted_CookingIsCalledWithCorrectParameters(int presses, int ExpectedWattage, int ExpectedTime)
+        {
 
-        //    door.Close();
+            door.Close();
 
-        //    for (int i = 0; i < presses; i++)
-        //    {
-        //        powerButton.Press();
-        //        timeButton.Press();
-        //    }
-        //    startCancelButton.Press();
-            
-        //    fakePowerTube.Received(1).TurnOn(ExpectedWattage);
-        //    fakeTimer.Received(1).Start(ExpectedTime);
+            for (int i = 0; i < presses; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < presses; i++)
+            {
+                timeButton.Press();
+            }
+            startCancelButton.Press();
 
-        //}
+            fakePowerTube.Received(1).TurnOn(ExpectedWattage);
+            fakeTimer.Received(1).Start(ExpectedTime*60);
+
+        }
+        [Test]
+        public void OvenCookingStartedThenStopped_CookControllerStopsTimerAndPowertube()
+        {
+
+            door.Close();
+
+            for (int i = 0; i < 5; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                timeButton.Press();
+            }
+            startCancelButton.Press();
+            startCancelButton.Press();
+
+            fakePowerTube.Received(1).TurnOff();
+            fakeTimer.Received(1).Stop();
+
+        }
+
     }
 }
