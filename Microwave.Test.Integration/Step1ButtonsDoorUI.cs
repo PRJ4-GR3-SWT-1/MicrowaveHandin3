@@ -32,6 +32,20 @@ namespace Microwave.Test.Integration
             //Assemble instances to UI
             ui = new UserInterface(powerButton, timeButton, startCancelButton, door, display, light, cookController);
         }
+        private void InitiateOven()
+        {
+            door.Open();
+            door.Close();
+            for (int i = 0; i < 10; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < 10; i++)
+            {
+                timeButton.Press();
+            }
+            startCancelButton.Press();
+        }
         //UC step 2:
         [Test]
         public void OpenDoor__LightIsOn()
@@ -117,17 +131,7 @@ namespace Microwave.Test.Integration
 
         public void PressStartCancel_MicrowaveIsSetUp_LightIsCalled()
         {
-            door.Open();
-            door.Close();
-            for (int i = 0; i < 10; i++)
-            {
-                powerButton.Press();
-            }
-            for (int i = 0; i < 10; i++)
-            {
-                timeButton.Press();
-            }
-            startCancelButton.Press();
+            InitiateOven();
 
             light.Received(2).TurnOn();
         }
@@ -135,20 +139,11 @@ namespace Microwave.Test.Integration
         [Test]
         public void PressStartCancel_MicrowaveIsSetUp_CookControllerIsCalled()
         {
-            door.Open();
-            door.Close();
-            for (int i = 0; i < 10; i++)
-            {
-                powerButton.Press();
-            }
-            for (int i = 0; i < 10; i++)
-            {
-                timeButton.Press();
-            }
-            startCancelButton.Press();
+            InitiateOven();
 
             cookController.Received(1).StartCooking(Arg.Any<int>(),600);
         }
+
 
         //UC step 10:
         [TestCase(1, 50)]
@@ -180,17 +175,7 @@ namespace Microwave.Test.Integration
         [Test]
         public void CookingIsDone_NormalProcedure_LightTurnsOff()
         {
-            door.Open();
-            door.Close();
-            for (int i = 0; i < 10; i++)
-            {
-                powerButton.Press();
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                timeButton.Press();
-            }
-            startCancelButton.Press();
+            InitiateOven();
             ui.CookingIsDone();
             light.Received(2).TurnOff();
         }
@@ -199,17 +184,7 @@ namespace Microwave.Test.Integration
         [Test]
         public void CookingIsDone_NormalProcedure_DisplayIsBlanked()
         {
-            door.Open();
-            door.Close();
-            for (int i = 0; i < 10; i++)
-            {
-                powerButton.Press();
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                timeButton.Press();
-            }
-            startCancelButton.Press();
+            InitiateOven();
             ui.CookingIsDone();
             display.Received(1).Clear();
         }
@@ -218,17 +193,7 @@ namespace Microwave.Test.Integration
         [Test]
         public void DoorOpens_CookingIsDone_LightTurnsOn()
         {
-            door.Open();
-            door.Close();
-            for (int i = 0; i < 10; i++)
-            {
-                powerButton.Press();
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                timeButton.Press();
-            }
-            startCancelButton.Press();
+            InitiateOven();
             ui.CookingIsDone();
             door.Open();
             light.Received(3).TurnOn();
@@ -238,17 +203,7 @@ namespace Microwave.Test.Integration
         [Test]
         public void DoorCloses_CookingIsDone_LightTurnsOff()
         {
-            door.Open();
-            door.Close();
-            for (int i = 0; i < 10; i++)
-            {
-                powerButton.Press();
-            }
-            for (int i = 0; i < 2; i++)
-            {
-                timeButton.Press();
-            }
-            startCancelButton.Press();
+            InitiateOven();
             ui.CookingIsDone();
             door.Open();
             door.Close();
