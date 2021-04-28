@@ -96,6 +96,29 @@ namespace Microwave.Test.Integration
             Thread.Sleep(1100);
             output.Received(1).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($"display shows: 09:59")));
         }
+        [TestCase(1,5,0,55)]
+        [TestCase(1, 10, 0, 50)]
+        //[TestCase(10, 65, 8, 55)]
+        public void PressStartAndWait_OvenIsSetUp_DisplayShowsCorrectTime(int cookTimeM, int waitTimeS,int expectedTimeM, int expectedTimeS)
+        {
+            door.Open();
+            door.Close();
+            for (int i = 0; i < 5; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < cookTimeM; i++)
+            {
+                timeButton.Press();
+            }
+            startCancelButton.Press();
+            Thread.Sleep(waitTimeS*1000+50);
+            output.Received(1).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($"display shows: {expectedTimeM:D2}:{expectedTimeS:D2}")));
+        }
+        //12.When the time has expired, the power tube is turned off
 
+        //13.The light inside the oven goes off
+
+        //14.The display is blanked
     }
 }
