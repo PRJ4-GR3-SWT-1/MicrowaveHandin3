@@ -167,7 +167,7 @@ namespace Microwave.Test.Integration
         public void PressStartAndWait_OvenIsSetUp_DisplayShowsCorrectTime(int cookTimeM, int waitTimeS, int expectedTimeM, int expectedTimeS)
         {
             InitiateOven(cookTimeM);
-            Thread.Sleep(waitTimeS * 1000 + 50);
+            Thread.Sleep(waitTimeS * 1000+100);
             Assert.That(str.ToString().ToLower().Contains($"display shows: {expectedTimeM:D2}:{expectedTimeS:D2}"));
         }
 
