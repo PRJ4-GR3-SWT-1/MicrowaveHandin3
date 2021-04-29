@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using Microwave.Classes.Boundary;
 using Microwave.Classes.Controllers;
 using Microwave.Classes.Interfaces;
@@ -43,8 +44,9 @@ namespace Microwave.Test.Integration
             //Assemble instances to UI
             cookController = new CookController(fakeTimer, fakeDisplay, fakePowerTube);
             ui = new UserInterface(powerButton, timeButton, startCancelButton, door, display, light, cookController);
+            cookController.UI = ui;
         }
-
+        // UC step: 6
         [TestCase(1,50)]
         [TestCase(13, 650)]
         [TestCase(14, 700)]
@@ -62,7 +64,7 @@ namespace Microwave.Test.Integration
             fakeOutput.Received().OutputLine(Arg.Is<string>(str=>str.ToLower().Contains($" {ExpectedWattage} ")));
 
         }
-
+        // UC step: 7
         [TestCase(1, "01")]
         [TestCase(59, "59")]
         //[TestCase(60, "00")] // Fejl fundet. Display viser 60:00 min istedet for 00:00
@@ -79,7 +81,7 @@ namespace Microwave.Test.Integration
             fakeOutput.Received(1).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($" {ExpectedMinut}:")));
 
         }
-
+        // UC step: 5 in Extension 2
         [TestCase(1, "01")]
         [TestCase(59, "59")]
         public void OvenTimeButtonDoorOpened_NothingIsDisplayedToOutput(int presses, string ExpectedMinut)
@@ -95,7 +97,7 @@ namespace Microwave.Test.Integration
             fakeOutput.Received(0).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($" {ExpectedMinut}:")));
 
         }
-
+        //UC step: 5 in extension 2
         [TestCase(1, 50)]
         [TestCase(13, 650)]
         [TestCase(14, 700)]
@@ -113,7 +115,7 @@ namespace Microwave.Test.Integration
             fakeOutput.Received(0).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($" {ExpectedWattage} ")));
 
         }
-
+        // UC step: 5 in extionsion 2
         [Test]
         public void OvenStartedDoorOpened_DisplayIsCleared()
         {
@@ -125,7 +127,7 @@ namespace Microwave.Test.Integration
 
             fakeOutput.Received(1).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($" cleared")));
         }
-
+        // UC step: 5 in extionsion 2
         [Test]
         public void OvenStartedDoorOpened_SettingsIsCleared()
         {
@@ -137,7 +139,7 @@ namespace Microwave.Test.Integration
 
             fakeOutput.Received(1).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($" cleared")));
         }
-
+        // UC step: 4 in extionsion 2
         [Test]
         public void OvenDoorOpened_LightIsTurnedOn()
         {
@@ -145,7 +147,7 @@ namespace Microwave.Test.Integration
 
             fakeOutput.Received(1).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($" turned on")));
         }
-
+        // UC step: 10 in extionsion 3
         [Test]
         public void OvenDoorOpenedThenClosed_LightIsTurnedOff()
         {
@@ -154,7 +156,7 @@ namespace Microwave.Test.Integration
 
             fakeOutput.Received(1).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($" turned off")));
         }
-
+        // UC step: 10-11
         [TestCase(1, 50, 1)]
         [TestCase(13, 650, 13)]
         [TestCase(14, 700, 14)]
@@ -175,9 +177,11 @@ namespace Microwave.Test.Integration
             startCancelButton.Press();
 
             fakePowerTube.Received(1).TurnOn(ExpectedWattage);
+            // The time is in seconds. Hence the *60
             fakeTimer.Received(1).Start(ExpectedTime*60);
 
         }
+        // UC step: extension 3
         [Test]
         public void OvenCookingStartedThenStopped_CookControllerStopsTimerAndPowertube()
         {
@@ -197,8 +201,38 @@ namespace Microwave.Test.Integration
 
             fakePowerTube.Received(1).TurnOff();
             fakeTimer.Received(1).Stop();
+        }
+        // UC step 11-12
+        [Test]
+        public void OvenCookingStarted_CookControllerTimerIsStartedAndStopped()
+        {
+            door.Close();
+
+            for (int i = 0; i < 5; i++)
+            {
+                powerButton.Press();
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                timeButton.Press();
+            }
+            startCancelButton.Press();
+            fakeTimer.Received(1).Start(300);
+            startCancelButton.Press();
+            fakeTimer.Received(1).Stop();
 
         }
+        // UC step: 12
+        [Test]
+        public void OvenCookingStarted_TimerExperied_CookingIsDone()
+        {
+            powerButton.Press();
+            timeButton.Press();
+            startCancelButton.Press();
 
+            fakeTimer.Expired += Raise.Event();
+
+            fakeOutput.Received(1).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($" turned off")));
+        }
     }
 }
