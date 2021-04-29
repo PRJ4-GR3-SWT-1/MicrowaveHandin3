@@ -209,5 +209,39 @@ namespace Microwave.Test.Integration
             door.Close();
             light.Received(3).TurnOff();
         }
+        //UC step 1 in extension 1:
+        [Test]
+        public void CookingSetup_StartCancelIsPressed_DisplayIsCleared()
+        {
+            powerButton.Press();
+            startCancelButton.Press();
+            display.Received(1).Clear();
+        }
+        //UC step 1 in extension 2:
+        [Test]
+        public void CookingSetup_DoorIsOpened_DisplayIsCleared()
+        {
+            powerButton.Press();
+            timeButton.Press();
+            door.Open();
+
+            display.Received(1).Clear();
+        }
+        //UC step 1 in extension 3:
+        [Test]
+        public void CookingStarted_StartCancelIsPressed_DisplayIsCleared()
+        {
+            InitiateOven();
+            startCancelButton.Press();
+            display.Received(1).Clear();
+        }
+        //UC step 1 in extension 1:
+        [Test]
+        public void CookingStarted_DoorIsOpened_DisplayIsCleared()
+        {
+            InitiateOven();
+            door.Open();
+            display.Received(1).Clear();
+        }
     }
 }
