@@ -43,7 +43,7 @@ namespace Microwave.Test.Integration
             cookController.UI = ui;
 
         }
-        private void InitiateOven()
+        private void InitiateOven(int timeS=10)
         {
             door.Open();
             door.Close();
@@ -51,10 +51,11 @@ namespace Microwave.Test.Integration
             {
                 powerButton.Press();
             }
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < timeS; i++)
             {
                 timeButton.Press();
             }
+            
             startCancelButton.Press();
         }
         //UC step 10 "The powertube starts working at the desired powerlevel":
@@ -95,6 +96,24 @@ namespace Microwave.Test.Integration
             InitiateOven();
             Thread.Sleep(1100);
             output.Received(1).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($"display shows: 09:59")));
+        }
+        [TestCase(1,5,0,55)]
+        [TestCase(1, 10, 0, 50)]
+        //[TestCase(10, 65, 8, 55)]
+        public void PressStartAndWait_OvenIsSetUp_DisplayShowsCorrectTime(int cookTimeM, int waitTimeS,int expectedTimeM, int expectedTimeS)
+        {
+           InitiateOven(cookTimeM);
+            Thread.Sleep(waitTimeS*1000+50);
+            output.Received(1).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($"display shows: {expectedTimeM:D2}:{expectedTimeS:D2}")));
+        }
+        //12.When the time has expired, the power tube is turned off
+        [Test]
+        public void CookingStops_OvenIsSetUp_PowerTubeIsTurnedOff()
+        {
+            InitiateOven(1);
+            Thread.Sleep(60*1000+100);
+            output.Received(1).OutputLine(Arg.Is<string>(str => str.ToLower().Contains($"powertube turned off")));
+
         }
 
     }
